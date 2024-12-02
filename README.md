@@ -1,7 +1,7 @@
 # joystick++
 
 A minimal C++ object-oriented API onto joystick devices under Linux.
-This repository is based on https://github.com/drewnoakes/joystick(https://github.com/drewnoakes/joystick)
+This repository is based on [https://github.com/drewnoakes/joystick](https://github.com/drewnoakes/joystick)
 It was developed to enable the control of mobile robots or other robots using a joystick.
 
 ## usage
