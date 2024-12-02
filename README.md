@@ -1,8 +1,10 @@
 # joystick++
 
 A minimal C++ object-oriented API onto joystick devices under Linux.
+This repository is based on https://github.com/drewnoakes/joystick(https://github.com/drewnoakes/joystick)
+It was developed to enable the control of mobile robots or other robots using a joystick.
 
-# usage
+## usage
 
 Create an instance of `Joystick`:
 
@@ -15,8 +17,8 @@ Ensure that it was found and that we can use it:
 ```c++
 if (!joystick.isFound())
 {
-  printf("open failed.\n");
-  // hmm
+  printf("Failed to open joystick device.\n");
+  return 1;
 }
 ```
 
@@ -30,27 +32,43 @@ if (joystick.sample(&event))
 }
 ```
 
-# example
+## example
 
 You might run this in a loop:
 
 ```c++
 while (true)
 {
-  // Restrict rate
   usleep(1000);
 
-  // Attempt to sample an event from the joystick
   JoystickEvent event;
   if (joystick.sample(&event))
   {
-    if (event.isButton())
+    if (event.isAxis() && (event.number == 0 || event.number == 1))
     {
-      printf("Button %u is %s\n", event.number, event.value == 0 ? "up" : "down");
+      // Update axis values
+      axisValues[event.number] = event.value;
+
+      // Apply threshold filter and calculate velocities
+      double linearVelocity = applyThreshold(-axisValues[1], V_MAX);
+      double angularVelocity = applyThreshold(-axisValues[0], W_MAX);
+
+      // Print axis velocities
+      printf("Axis: [Linear Velocity: %.2f m/s, Angular Velocity: %.2f rad/s]\n", linearVelocity, angularVelocity);
     }
-    else if (event.isAxis())
+    else if (event.isButton())
     {
-      printf("Axis %u is at position %d\n", event.number, event.value);
+      // Update button state
+      buttonStates[event.number] = event.value;
+
+      // Print button states
+      printf("Buttons: [");
+      for (int i = 0; i < BUTTON_COUNT; ++i)
+      {
+        printf("%d", buttonStates[i]);
+        if (i < BUTTON_COUNT - 1) printf(", ");
+      }
+      printf("]\n");
     }
   }
 }
@@ -58,14 +76,10 @@ while (true)
 
 This produces something similar to:
 
-    Button 1 is up
-    Button 2 is down
-    Axis 0 is at position 122
-    Axis 1 is at position -11
-    Axis 2 is at position 9796
-    Axis 3 is at position -13850
+    Axis: [Linear Velocity: 0.79 m/s, Angular Velocity: -1.22 rad/s]
+    Buttons: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
 
-# options
+## options
 
 You can specify the particular joystick by id:
 
@@ -80,8 +94,10 @@ Or provide a specific device name:
 Joystick js0("/dev/input/js0");
 ```
 
-# license
+## license
 
 Released under [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0).
 
-Copyright [Drew Noakes](http://drewnoakes.com) 2013-2017.
+## Contributor
+ - Name: Jaehong Lee (이재홍)
+ - Email: leejae0720@gmail.com
