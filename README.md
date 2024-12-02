@@ -11,7 +11,7 @@ Create an instance of `Joystick`:
 ```c++
 Joystick joystick;
 ```
-Setting your mobile or other robot linear belocity and angler velocity
+Setting your mobile robot or other robot linear velocity and angler velocity
 
 ```
 #define V_MAX 0.8      // Maximum linear velocity (m/s)
