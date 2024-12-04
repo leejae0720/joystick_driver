@@ -1,1 +1,1 @@
-g++ test.cc joystick.cc -std=c++0x -Wall -o test
+g++ main.cpp joystick_controller.cpp -std=c++0x -Wall -o joystick_app
