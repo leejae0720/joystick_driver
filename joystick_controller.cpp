@@ -110,13 +110,22 @@ void JoystickController::monitorInput()
         JoystickEvent event;
         if (joystick.sample(&event))
         {
-            if (event.isAxis())
-            {
-                handleAxisEvent(event);
-            }
-            else if (event.isButton())
+            if (event.isButton())
             {
                 handleButtonEvent(event);
+            }
+
+            // Check if the 6th button (index 5) is pressed
+            if (buttonStates[5] == 1) // 6th button is active
+            {
+                if (event.isAxis())
+                {
+                    handleAxisEvent(event);
+                }
+            }
+            else
+            {
+                spdlog::info("Autonomous mode control");
             }
         }
     }
