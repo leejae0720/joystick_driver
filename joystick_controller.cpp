@@ -1,6 +1,6 @@
 #include "joystick_controller.hpp"
 
-// joystick setting
+// Joystick settings
 Joystick::Joystick()
 {
     openPath("/dev/input/js0");
@@ -8,30 +8,30 @@ Joystick::Joystick()
 
 Joystick::~Joystick()
 {
-    if(_fd >= 0)
+    if (_fd >= 0)
         close(_fd);
 }
 
 Joystick::Joystick(int joystickNumber)
 {
-        std::stringstream sstm;
-        sstm << "/dev/input/js" << joystickNumber;
-        openPath(sstm.str());
+    std::stringstream sstm;
+    sstm << "/dev/input/js" << joystickNumber;
+    openPath(sstm.str());
 }
 
-Joystick::Joystick(std::string devicePath) 
-{ 
-    openPath(devicePath); 
+Joystick::Joystick(std::string devicePath)
+{
+    openPath(devicePath);
 }
 
 Joystick::Joystick(std::string devicePath, bool blocking)
-{ 
-    openPath(devicePath, blocking); 
+{
+    openPath(devicePath, blocking);
 }
 
-bool Joystick::isFound() 
-{ 
-    return _fd >= 0; 
+bool Joystick::isFound()
+{
+    return _fd >= 0;
 }
 
 bool Joystick::sample(JoystickEvent *event)
@@ -40,14 +40,14 @@ bool Joystick::sample(JoystickEvent *event)
     return bytes == sizeof(*event);
 }
 
-// joystick controller system implementation
+// Joystick controller system implementation
 JoystickController::JoystickController(const std::string &devicePath) : joystick(devicePath)
 {
     if (!joystick.isFound())
     {
         throw std::runtime_error("Failed to open joystick device.");
     }
-    printf("Joystick initialized successfully!\n");
+    spdlog::info("Joystick initialized successfully!");
 }
 
 /**
@@ -74,7 +74,7 @@ void JoystickController::handleAxisEvent(const JoystickEvent &event)
         double linearVelocity = applyThreshold(-axisValues[1], V_MAX);
         double angularVelocity = applyThreshold(-axisValues[0], W_MAX);
 
-        printf("Axis: [Linear Velocity: %.2f m/s, Angular Velocity: %.2f rad/s]\n", linearVelocity, angularVelocity);
+        spdlog::info("Axis: [Linear Velocity: {:.2f} m/s, Angular Velocity: {:.2f} rad/s]", linearVelocity, angularVelocity);
     }
 }
 
@@ -85,14 +85,16 @@ void JoystickController::handleButtonEvent(const JoystickEvent &event)
 {
     buttonStates[event.number] = event.value;
 
-    printf("Buttons: [");
+    std::string buttonStatesStr;
     for (int i = 0; i < BUTTON_COUNT; ++i)
     {
-        printf("%d", buttonStates[i]);
+        buttonStatesStr += std::to_string(buttonStates[i]);
         if (i < BUTTON_COUNT - 1)
-            printf(", ");
+        {
+            buttonStatesStr += ", ";
+        }
     }
-    printf("]\n");
+    spdlog::info("Buttons: [{}]", buttonStatesStr);
 }
 
 /**
@@ -100,7 +102,7 @@ void JoystickController::handleButtonEvent(const JoystickEvent &event)
  */
 void JoystickController::monitorInput()
 {
-    printf("Monitoring joystick input...\n");
+    spdlog::info("Monitoring joystick input...");
     while (true)
     {
         usleep(1000);

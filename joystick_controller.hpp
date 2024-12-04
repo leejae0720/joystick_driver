@@ -12,6 +12,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#include <spdlog/spdlog.h>
 
 // Constants for joystick event types
 #define JS_EVENT_BUTTON 0x01 // button pressed/released
