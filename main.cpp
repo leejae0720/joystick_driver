@@ -9,7 +9,7 @@ int main()
     }
     catch (const std::exception &e)
     {
-        fprintf(stderr, "Error: %s\n", e.what());
+        spdlog::error("Error: Failed to open joystick device");
         return 1;
     }
 
