@@ -1,5 +1,7 @@
 #include "joystick_controller.hpp"
 
+bool CONTROL_MODE = false;  // define control mode (fasle: autonomous, true: manual)
+
 // Joystick settings
 Joystick::Joystick()
 {
@@ -118,6 +120,7 @@ void JoystickController::monitorInput()
             // Check if the 6th button (index 5) is pressed
             if (buttonStates[5] == 1) // 6th button is active
             {
+                CONTROL_MODE = true;
                 if (event.isAxis())
                 {
                     handleAxisEvent(event);
@@ -125,6 +128,7 @@ void JoystickController::monitorInput()
             }
             else
             {
+                CONTROL_MODE = false;
                 spdlog::info("Autonomous mode control");
             }
         }
