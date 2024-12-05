@@ -4,7 +4,11 @@ A minimal C++ object-oriented API onto joystick devices under Linux.
 This repository is based on [https://github.com/drewnoakes/joystick](https://github.com/drewnoakes/joystick)
 It was developed to enable the control of mobile robots or other robots using a joystick.
 
-## usage
+## Tested device
+ - F310
+ - PlayStation DualSense 
+
+## Usage
 
 Create an instance of `Joystick`:
 
@@ -38,7 +42,7 @@ if (joystick.sample(&event))
 }
 ```
 
-## example
+## Example
 
 You might run this in a loop:
 
@@ -85,7 +89,7 @@ This produces something similar to:
     Axis: [Linear Velocity: 0.79 m/s, Angular Velocity: -1.22 rad/s]
     Buttons: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
 
-## options
+## Options
 
 You can specify the particular joystick by id:
 
@@ -100,7 +104,7 @@ Or provide a specific device name:
 Joystick js0("/dev/input/js0");
 ```
 
-## license
+## License
 
 Released under [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0).
 
