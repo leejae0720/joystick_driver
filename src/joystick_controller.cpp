@@ -63,55 +63,55 @@ public:
   }
 
 private:
-    int _fd = -1;
+  int _fd = -1;
 
-    void openPath(const std::string& path) {
-        _fd = open(path.c_str(), O_RDONLY | O_NONBLOCK);
-    }
+  void openPath(const std::string& path) {
+      _fd = open(path.c_str(), O_RDONLY | O_NONBLOCK);
+  }
 };
 
 class JoystickController {
 public:
-    JoystickController(const std::string& devicePath, rclcpp::Node::SharedPtr node)
-        : joystick(devicePath), node_(node)
-    {
-        if (!joystick.isFound()) {
-            throw std::runtime_error("Failed to open joystick device.");
-        }
-
-        // Declare parameters
-        node_->declare_parameter("v_max", 0.5);
-        node_->declare_parameter("w_max", 1.5);
-        node_->get_parameter("v_max", v_max_);
-        node_->get_parameter("w_max", w_max_);
-
-        twist_pub_ = node_->create_publisher<geometry_msgs::msg::Twist>("/cmd_vel", 10);
-        spdlog::info("Joystick initialized and publisher created.");
+  JoystickController(const std::string& devicePath, rclcpp::Node::SharedPtr node)
+      : joystick(devicePath), node_(node)
+  {
+    if (!joystick.isFound()) {
+      throw std::runtime_error("Failed to open joystick device.");
     }
 
-  void monitorInput() {
-      spdlog::info("Start monitoring joystick...");
-      while (rclcpp::ok()) {
-          usleep(1000);
-          JoystickEvent event;
-          if (joystick.sample(&event)) {
-              if (event.isButton()) {
-                  handleButtonEvent(event);
-              }
+    // Declare parameters
+    node_->declare_parameter("v_max", 0.5);
+    node_->declare_parameter("w_max", 1.5);
+    node_->get_parameter("v_max", v_max_);
+    node_->get_parameter("w_max", w_max_);
 
-              if (buttonStates_[5] == 1) {
-                  CONTROL_MODE = true;
-                  if (event.isAxis()) {
-                      handleAxisEvent(event);
-                  }
-              } else {
-                  CONTROL_MODE = false;
-                  geometry_msgs::msg::Twist stop_msg;
-                  twist_pub_->publish(stop_msg);
-                  spdlog::info("Autonomous mode active.");
-              }
+    twist_pub_ = node_->create_publisher<geometry_msgs::msg::Twist>("/cmd_vel", 10);
+    spdlog::info("Joystick initialized and publisher created.");
+  }
+
+  void monitorInput() {
+    spdlog::info("Start monitoring joystick...");
+    while (rclcpp::ok()) {
+      usleep(1000);
+      JoystickEvent event;
+      if (joystick.sample(&event)) {
+        if (event.isButton()) {
+          handleButtonEvent(event);
+        }
+
+        if (buttonStates_[5] == 1) {
+          CONTROL_MODE = true;
+          if (event.isAxis()) {
+              handleAxisEvent(event);
           }
+        } else {
+          CONTROL_MODE = false;
+          geometry_msgs::msg::Twist stop_msg;
+          twist_pub_->publish(stop_msg);
+          spdlog::info("Autonomous mode active.");
+        }
       }
+    }
   }
 
 private:

@@ -39,10 +39,10 @@ public:
 
   friend std::ostream &operator<<(std::ostream &os, const JoystickEvent &e)
   {
-      os << "type=" << static_cast<int>(e.type)
-          << " number=" << static_cast<int>(e.number)
-          << " value=" << static_cast<int>(e.value);
-      return os;
+    os << "type=" << static_cast<int>(e.type)
+      << " number=" << static_cast<int>(e.number)
+      << " value=" << static_cast<int>(e.value);
+    return os;
   }
 };
 
@@ -84,8 +84,6 @@ public:
   void monitorInput();
     
 private:
-  // static constexpr double V_MAX = 0.8;       // Maximum linear velocity (m/s)
-  // static constexpr double W_MAX = 3.11;      // Maximum angular velocity (rad/s)
   static constexpr int THRESHOLD = 1500;     // Noise threshold for axis values
   static constexpr int BUTTON_COUNT = 12;    // Maximum number of button
 
