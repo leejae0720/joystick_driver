@@ -4,7 +4,7 @@
   <version>0.1.0</version>
   <description>Joystick to cmd_vel publisher using low-level /dev/input/js0 interface</description>
 
-  <maintainer email="george@clobot.co.kr">Your Name</maintainer>
+  <maintainer email="leejae0720@gmail.com">Jaehong Lee</maintainer>
   <license>TODO: insert license</license>
 
   <!-- Build tool dependencies -->
@@ -13,8 +13,7 @@
   <!-- Build/runtime dependencies -->
   <depend>rclcpp</depend>
   <depend>geometry_msgs</depend>
-
-  <!-- C++ 표준 사용 -->
+  
   <export>
     <build_type>ament_cmake</build_type>
   </export>
