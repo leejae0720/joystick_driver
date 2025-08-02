@@ -1,101 +1,63 @@
-#ifndef __JOYSTICK_CONTROLLER_HPP__
-#define __JOYSTICK_CONTROLLER_HPP__
+#pragma once
 
-#include <cmath>
-#include <cstdio>
-#include <unistd.h>
-#include <stdexcept>
-#include <iostream>
-#include <string>
 #include <fcntl.h>
-#include <sstream>
-#include <sys/types.h>
-#include <sys/stat.h>
 #include <unistd.h>
+#include <linux/joystick.h>
+#include <cmath>
+#include <cstring>
+#include <sstream>
+#include <stdexcept>
+#include <string>
 #include <spdlog/spdlog.h>
 
-// Constants for joystick event types
-#define JS_EVENT_BUTTON 0x01 // button pressed/released
-#define JS_EVENT_AXIS   0x02 // joystick moved
-#define JS_EVENT_INIT   0x80 // initial state of device
+#include <rclcpp/rclcpp.hpp>
+#include <geometry_msgs/msg/twist.hpp>
 
-/**
- * Encapsulates all data relevant to a sampled joystick event.
- */
-class JoystickEvent
-{
-public:
-  static const short MIN_AXES_VALUE = -32768;
-  static const short MAX_AXES_VALUE = 32767;
+#define THRESHOLD 8000
+#define BUTTON_COUNT 12
 
-  unsigned int time;
-  short value;
-  unsigned char type;
-  unsigned char number;
+extern double v_max_;
+extern double w_max_;
+extern bool CONTROL_MODE;
 
-  bool isButton() { return (type & JS_EVENT_BUTTON) != 0; }
-  bool isAxis() { return (type & JS_EVENT_AXIS) != 0; }
-  bool isInitialState() { return (type & JS_EVENT_INIT) != 0; }
+struct JoystickEvent {
+  struct js_event js;
+  bool isAxis() const;
+  bool isButton() const;
+  uint8_t number = 0;
+  int16_t value = 0;
 
-  friend std::ostream &operator<<(std::ostream &os, const JoystickEvent &e)
-  {
-    os << "type=" << static_cast<int>(e.type)
-      << " number=" << static_cast<int>(e.number)
-      << " value=" << static_cast<int>(e.value);
-    return os;
-  }
+  void parse(const struct js_event& e);
 };
 
-/**
- * Represents a joystick device. Allows data to be sampled from it.
- */
-class Joystick
-{
-
+class Joystick {
 public:
-~Joystick();
-Joystick();
-Joystick(int joystickNumber);
-Joystick(std::string devicePath);
-Joystick(std::string devicePath, bool blocking);
+  Joystick();
+  Joystick(int joystickNumber);
+  Joystick(const std::string& devicePath);
+  ~Joystick();
 
-bool isFound();
-
-bool sample(JoystickEvent *event);
+  bool isFound() const;
+  bool sample(JoystickEvent* event);
 
 private:
-  int _fd;
-
-  void openPath(std::string devicePath, bool blocking = false)
-  {
-    _fd = open(devicePath.c_str(), blocking ? O_RDONLY : O_RDONLY | O_NONBLOCK);
-  }
+  int _fd = -1;
+  void openPath(const std::string& path);
 };
 
-/**
- * Controller class to process joystick events and handle inputs.
- */
-class JoystickController
-{
-
+class JoystickController {
 public:
-  explicit JoystickController(const std::string &devicePath = "/dev/input/js0");
-
+  JoystickController(const std::string& devicePath, rclcpp::Node::SharedPtr node);
   void monitorInput();
-    
-private:
-  static constexpr int THRESHOLD = 1500;     // Noise threshold for axis values
-  static constexpr int BUTTON_COUNT = 12;    // Maximum number of button
 
+private:
   Joystick joystick;
-  int axisValues[2] = {0, 0};                // Axis 1 (linear), Axis 0 (angular)
-  int buttonStates[BUTTON_COUNT] = {0};      // Button states (pressed/released)
+  rclcpp::Node::SharedPtr node_;
+  rclcpp::Publisher<geometry_msgs::msg::Twist>::SharedPtr twist_pub_;
+  int axisValues_[8] = {0};
+  int buttonStates_[BUTTON_COUNT] = {0};
 
   double applyThreshold(int value, double maxVelocity);
-
-  void handleAxisEvent(const JoystickEvent &event);
-
-  void handleButtonEvent(const JoystickEvent &event);
+  void handleAxisEvent(const JoystickEvent& event);
+  void handleButtonEvent(const JoystickEvent& event);
 };
-
-#endif // __JOYSTICK_CONTROLLER_HPP__
