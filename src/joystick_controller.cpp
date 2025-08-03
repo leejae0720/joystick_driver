@@ -9,9 +9,11 @@ bool CONTROL_MODE = false;
 bool JoystickEvent::isAxis() const {
   return (js.type & ~JS_EVENT_INIT) == JS_EVENT_AXIS;
 }
+
 bool JoystickEvent::isButton() const {
   return (js.type & ~JS_EVENT_INIT) == JS_EVENT_BUTTON;
 }
+
 void JoystickEvent::parse(const struct js_event& e) {
   js = e;
   number = e.number;
@@ -22,29 +24,60 @@ void JoystickEvent::parse(const struct js_event& e) {
 Joystick::Joystick() {
   openPath("/dev/input/js0");
 }
+
 Joystick::Joystick(int joystickNumber) {
   std::stringstream ss;
   ss << "/dev/input/js" << joystickNumber;
   openPath(ss.str());
 }
+
 Joystick::Joystick(const std::string& devicePath) {
+  device_path_ = devicePath;
   openPath(devicePath);
 }
+
 Joystick::~Joystick() {
   if (_fd >= 0) close(_fd);
 }
+
 bool Joystick::isFound() const {
   return _fd >= 0;
 }
+
 bool Joystick::sample(JoystickEvent* event) {
   struct js_event js;
   int bytes = read(_fd, &js, sizeof(struct js_event));
+
   if (bytes == sizeof(struct js_event)) {
     event->parse(js);
     return true;
+  } else if (bytes == -1 && (errno == EAGAIN || errno == EWOULDBLOCK)) {
+    // 비동기 읽기: 읽을 데이터 없음 → 정상
+    return false;
+  } else {
+    // 이 경우에만 실제 연결 끊김으로 간주
+    if (_fd >= 0) {
+      spdlog::warn("Joystick disconnected. Attempting to reconnect...");
+      close(_fd);
+      _fd = -1;
+    }
+
+    // 재시도 루프
+    while (rclcpp::ok()) {
+      std::this_thread::sleep_for(std::chrono::milliseconds(500));
+      openPath(device_path_);
+      if (_fd >= 0) {
+        spdlog::info("Joystick reconnected successfully.");
+        break;
+      } else {
+        spdlog::warn("Still waiting for joystick device...");
+      }
+    }
+
+    return false;
   }
-  return false;
 }
+
 void Joystick::openPath(const std::string& path) {
   _fd = open(path.c_str(), O_RDONLY | O_NONBLOCK);
 }

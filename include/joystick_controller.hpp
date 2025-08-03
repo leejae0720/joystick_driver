@@ -9,6 +9,7 @@
 #include <stdexcept>
 #include <string>
 #include <spdlog/spdlog.h>
+#include <errno.h>
 
 #include <rclcpp/rclcpp.hpp>
 #include <geometry_msgs/msg/twist.hpp>
@@ -42,6 +43,7 @@ public:
 
 private:
   int _fd = -1;
+  std::string device_path_;
   void openPath(const std::string& path);
 };
 
