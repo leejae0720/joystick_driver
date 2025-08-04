@@ -1,4 +1,4 @@
 joystick_controller_node:
   ros__parameters:
-    v_max: 0.5          # 선속도 최대값 (m/s)
-    w_max: 0.0872665    # 각속도 최대값 (rad/s), 5 degree/second
+    v_max: 0.5     # 선속도 최대값 (m/s)
+    w_max: 0.28    # 각속도 최대값 (rad/s)

@@ -18,7 +18,7 @@ int main(int argc, char* argv[]) {
   }
 
   if (controller != nullptr) {
-    controller->monitorInput();
+    controller->monitor_input();
     delete controller;
   }
 
